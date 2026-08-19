@@ -1,4 +1,5 @@
 node_modules/
 .DS_Store
 *.log
-site/assets/screenshots/*.tmp.png
+*.tgz
+site/artifact.html

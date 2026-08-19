@@ -472,7 +472,10 @@ async function viewTrends() {
 
   // model series present in the window, fixed slot colors
   const modelKeys = [...new Set(tr.days.flatMap((d) => Object.keys(d.byModel)))];
-  const series = modelKeys.map((k) => ({ key: k, label: k, color: cssColor(slotVar(modelSlot(k))) })).slice(0, 6);
+  const series = modelKeys
+    .map((k) => ({ key: k, label: k, slot: modelSlot(k), color: cssColor(slotVar(modelSlot(k))) }))
+    .sort((a, b) => a.slot - b.slot) // stack in validated palette order
+    .slice(0, 6);
   const rows = tr.days.map((d) => ({ dayMs: d.dayMs, values: d.byModel }));
   const totalCost = tr.days.reduce((a, d) => a + d.costUSD, 0);
 

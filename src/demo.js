@@ -323,7 +323,7 @@ function generateDemo(baseDir) {
     const start = now - dayAgo * 86400e3 - (3 + (i * 7) % 9) * 3600e3;
     const s = session({
       file: path.join(root, proj, sid + '.jsonl'), sessionId: sid,
-      cwd: '/Users/alex/code/' + proj.split('-').pop(), branch: 'main', title: '', startMs: start,
+      cwd: '/Users/alex/code/lumen-' + proj.split('-').pop(), branch: 'main', title: '', startMs: start,
     });
     s.title(title);
     s.prompt(title + '.');
