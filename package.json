@@ -1,0 +1,34 @@
+{
+  "name": "debrief-cli",
+  "version": "0.1.0",
+  "description": "The flight recorder for your AI coding agents. See what Claude Code did while you were away — sessions, files changed, commits, errors, cost — in a beautiful local dashboard. 100% private, zero dependencies.",
+  "bin": {
+    "debrief": "bin/debrief.js"
+  },
+  "type": "commonjs",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node bin/debrief.js",
+    "test": "node --test test/"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "web/",
+    "README.md",
+    "LICENSE.md"
+  ],
+  "keywords": [
+    "claude-code",
+    "claude",
+    "ai-agents",
+    "agent-observability",
+    "dashboard",
+    "flight-recorder",
+    "local-first"
+  ],
+  "author": "Abraão Azevedo",
+  "license": "SEE LICENSE IN LICENSE.md"
+}
