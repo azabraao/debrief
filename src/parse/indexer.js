@@ -37,6 +37,8 @@ async function indexFile(filePath, opts = {}) {
     startedAt: null,
     endedAt: null,
     activeMs: 0,             // sum of turn_duration system lines
+    gapActiveMs: 0,          // fallback: sum of inter-event gaps < 5min
+    _prevTsMs: null,
     prompts: 0,              // real user prompts
     slashCommands: 0,
     assistantMsgs: 0,        // deduped by message.id
@@ -52,6 +54,7 @@ async function indexFile(filePath, opts = {}) {
     lastError: null,
     interrupts: 0,
     questionsAsked: 0,
+    pendingQuestionText: null,
     artifacts: 0,
     skills: new Set(),
     subagentSpawns: 0,
@@ -73,6 +76,14 @@ async function indexFile(filePath, opts = {}) {
     if (line.timestamp) {
       if (!s.startedAt) s.startedAt = line.timestamp;
       s.endedAt = line.timestamp;
+      const ms = Date.parse(line.timestamp);
+      if (!Number.isNaN(ms)) {
+        if (s._prevTsMs != null) {
+          const gap = ms - s._prevTsMs;
+          if (gap > 0 && gap < 5 * 60000) s.gapActiveMs += gap;
+        }
+        s._prevTsMs = ms;
+      }
     }
     if (line.cwd && !s.cwd) s.cwd = line.cwd;
     if (line.gitBranch) s.gitBranch = line.gitBranch;
@@ -109,7 +120,7 @@ async function indexFile(filePath, opts = {}) {
         pendingTools.delete(b.tool_use_id);
         const isErr = b.is_error === true;
         const text = isErr || (pending && pending.kind) ? resultText(b) : '';
-        if (pending && pending.name === 'AskUserQuestion') s.pendingQuestion = false;
+        if (pending && pending.name === 'AskUserQuestion') { s.pendingQuestion = false; s.pendingQuestionText = null; }
         if (isErr) {
           s.errors++;
           s.lastError = truncate(text || 'tool error', 300);
@@ -176,6 +187,8 @@ async function indexFile(filePath, opts = {}) {
           } else if (name === 'AskUserQuestion') {
             s.questionsAsked++;
             s.pendingQuestion = true;
+            const qs = Array.isArray(input.questions) ? input.questions.map((q) => q && q.question).filter(Boolean) : [];
+            if (qs.length) s.pendingQuestionText = truncate(qs.join(' — '), 300);
           } else if (name === 'Artifact') {
             if (!input.action || input.action === 'publish') s.artifacts++;
           } else if (name === 'Skill' && input.skill) {
@@ -229,7 +242,7 @@ async function indexFile(filePath, opts = {}) {
     endedAt: s.endedAt,
     startMs, endMs,
     wallMs: startMs != null && endMs != null ? Math.max(0, endMs - startMs) : 0,
-    activeMs: s.activeMs,
+    activeMs: s.activeMs || s.gapActiveMs,
     prompts: s.prompts,
     slashCommands: s.slashCommands,
     assistantMsgs: s.assistantMsgs,
@@ -249,6 +262,7 @@ async function indexFile(filePath, opts = {}) {
     lastError: s.lastError,
     interrupts: s.interrupts,
     questionsAsked: s.questionsAsked,
+    pendingQuestionText: s.pendingQuestion ? s.pendingQuestionText : null,
     artifacts: s.artifacts,
     skills: [...s.skills],
     subagentSpawns: s.subagentSpawns,

@@ -7,7 +7,7 @@ const path = require('path');
 const os = require('os');
 const { indexFile } = require('./parse/indexer');
 
-const CACHE_VERSION = 5; // bump when the summary shape changes
+const CACHE_VERSION = 7; // bump when the summary shape changes
 const LIVE_WINDOW_MS = 3 * 60 * 1000;
 
 function defaultProjectsDir() {

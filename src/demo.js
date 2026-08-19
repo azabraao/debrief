@@ -89,11 +89,13 @@ function generateDemo(baseDir) {
   const root = baseDir || path.join(os.tmpdir(), 'debrief-demo', 'projects');
   fs.rmSync(root, { recursive: true, force: true });
   const now = Date.now();
-  // Virtual overnight: the fleet always worked the 9 hours ending ~now.
-  // night(22,4) = "22:04 last night" mapped onto [now-9h, now].
+  // Virtual overnight: the fleet always worked the ~5.5 hours ending ~now, so
+  // the whole story fits the "overnight" window at any viewing hour.
+  // night(22,4) = "22:04 last night" mapped proportionally onto [now-5.5h, now].
+  const SPAN = 5.5 * 3600e3;
   const night = (h, m) => {
     const offsetMin = (h >= 12 ? h - 22 : h + 2) * 60 + m;
-    return now - 9 * 3600e3 + offsetMin * 60e3;
+    return now - SPAN + offsetMin * 60e3 * (5.5 / 9);
   };
 
   const app = '-Users-alex-code-lumen-app';
@@ -297,6 +299,55 @@ function generateDemo(baseDir) {
     s.turnDur(360000);
     s.save(night(4, 34));
   }
+
+  // ── history: two weeks of prior days so Trends has a story ────────────────
+  const HISTORY = [
+    ['Wire up SSO with Okta', app, 'claude-opus-4-8', 3, 11, 2],
+    ['Fix N+1 queries on the usage endpoint', api, 'claude-opus-4-8', 5, 6, 1],
+    ['Prototype the AI onboarding checklist', app, 'claude-fable-5', 2, 9, 0],
+    ['Upgrade to React 20', app, 'claude-sonnet-5', 9, 14, 3],
+    ['Add rate limiting to public API', api, 'claude-opus-4-8', 4, 8, 1],
+    ['Instrument checkout funnel analytics', app, 'claude-sonnet-5', 6, 7, 1],
+    ['Rewrite pricing page copy', site, 'claude-fable-5', 1, 3, 1],
+    ['Chase down webhook retry storm', api, 'claude-opus-4-8', 7, 12, 2],
+    ['Add CSV export to usage reports', app, 'claude-sonnet-5', 3, 5, 1],
+    ['Refactor feature flag service', api, 'claude-opus-4-8', 8, 10, 2],
+    ['Design partner API pagination', api, 'claude-fable-5', 2, 6, 0],
+    ['Kill dead code in legacy dashboard', app, 'claude-sonnet-5', 12, 4, 1],
+    ['Harden webhook signature checks', api, 'claude-opus-4-8', 3, 7, 1],
+    ['Ship email digest v2', app, 'claude-opus-4-8', 6, 9, 2],
+  ];
+  HISTORY.forEach(([title, proj, model, nFiles, nCmds, nCommits], i) => {
+    const dayAgo = 1 + i; // one per day going back
+    const sid = `a1d2c3b4-9${String(i).padStart(3, '0')}-4000-9000-demo0000hist`;
+    const start = now - dayAgo * 86400e3 - (3 + (i * 7) % 9) * 3600e3;
+    const s = session({
+      file: path.join(root, proj, sid + '.jsonl'), sessionId: sid,
+      cwd: '/Users/alex/code/' + proj.split('-').pop(), branch: 'main', title: '', startMs: start,
+    });
+    s.title(title);
+    s.prompt(title + '.');
+    for (let k = 0; k < nFiles; k++) {
+      s.tick(9 * 60000).reply({
+        model, out: 1500 + ((i * 331 + k * 97) % 2600),
+        tools: [edit(`/Users/alex/code/x/src/mod${k}.ts`, 'old', 'new',
+          [{ oldStart: 1, newStart: 1, lines: ['-old line', '+new line'] }])],
+      });
+      s.turnDur(6 * 60000);
+    }
+    for (let k = 0; k < nCommits; k++) {
+      s.tick(5 * 60000).reply({
+        model, out: 400,
+        tools: [bash('Commit work', 'git commit -am "step"', `[main ${(1000000 + i * 7919 + k).toString(16)}] ${title.toLowerCase()} (part ${k + 1})\n 3 files changed`)],
+      });
+      s.turnDur(3 * 60000);
+    }
+    for (let k = 0; k < Math.max(0, nCmds - nCommits); k++) {
+      s.tick(4 * 60000).reply({ model, out: 300, tools: [bash('Check', 'npm run lint', 'clean')] });
+      s.turnDur(2 * 60000);
+    }
+    s.save(start + 3600e3);
+  });
 
   return root;
 }

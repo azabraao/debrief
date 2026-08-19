@@ -9,6 +9,9 @@ const { costUSD } = require('../pricing');
 
 const PAYLOAD = 2000;   // max chars for any single payload field
 const STDOUT_TAIL = 1200;
+// Tools whose success output is file content or boilerplate — echoing it as a
+// result line is noise (and for Read, would leak file contents into summaries).
+const SILENT_RESULTS = new Set(['Read', 'Edit', 'MultiEdit', 'NotebookEdit', 'TodoWrite']);
 
 function shortPath(p, cwd) {
   if (!p) return '';
@@ -162,7 +165,7 @@ async function sessionDetail(filePath, opts = {}) {
           if (ans.length) { ev.resultSummary = ans.join(' | '); (ev.detail = ev.detail || {}).answers = ans; }
         } else if (ev.name === 'Artifact' && tur && typeof tur === 'object' && tur.url) {
           ev.resultSummary = String(tur.url);
-        } else if (!isErr && !ev.resultSummary && text) {
+        } else if (!isErr && !ev.resultSummary && text && !SILENT_RESULTS.has(ev.name)) {
           ev.resultSummary = truncate(text.replace(/\s+/g, ' '), 140);
         }
       }
@@ -218,7 +221,11 @@ async function sessionDetail(filePath, opts = {}) {
   }
 
   for (const ev of pending.values()) {
-    if (!ev.done) { ev.pending = true; ev.resultSummary = ev.resultSummary || 'no result recorded'; }
+    if (!ev.done) {
+      ev.pending = true;
+      ev.resultSummary = ev.resultSummary ||
+        (ev.name === 'AskUserQuestion' ? 'waiting for your answer' : 'no result recorded');
+    }
   }
 
   const errorIndexes = events.filter((e) => e.isError).map((e) => e.i);

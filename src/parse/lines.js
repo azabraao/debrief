@@ -49,6 +49,8 @@ function stripHarnessMarkup(text) {
   t = t.replace(/<system-reminder>[\s\S]*?<\/system-reminder>/g, '');
   t = t.replace(/<local-command-caveat>[\s\S]*?<\/local-command-caveat>/g, '');
   t = t.replace(/<local-command-stdout>[\s\S]*?<\/local-command-stdout>/g, '');
+  t = t.replace(/<task-notification>[\s\S]*?<\/task-notification>/g, '');
+  t = t.replace(/<task-reminder>[\s\S]*?<\/task-reminder>/g, '');
   const cmd = /<command-name>([\s\S]*?)<\/command-name>/.exec(t);
   const cmdArgs = /<command-args>([\s\S]*?)<\/command-args>/.exec(t);
   if (cmd) {
