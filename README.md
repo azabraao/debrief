@@ -14,7 +14,7 @@ One command. No account. No cloud. Your transcripts never leave your machine.
 
 ![The Debrief — what happened while you were away](https://raw.githubusercontent.com/azabraao/debrief/main/site/assets/debrief-home.jpg)
 
-**Site:** [azabraao.github.io/debrief](https://azabraao.me/debrief/)
+**Site:** [azabraao.me/debrief](https://azabraao.me/debrief/)
 
 ## Why
 
