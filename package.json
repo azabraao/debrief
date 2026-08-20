@@ -30,5 +30,13 @@
     "local-first"
   ],
   "author": "Abraão Azevedo",
-  "license": "SEE LICENSE IN LICENSE.md"
+  "license": "SEE LICENSE IN LICENSE.md",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/azabraao/debrief.git"
+  },
+  "homepage": "https://azabraao.github.io/debrief/",
+  "bugs": {
+    "url": "https://github.com/azabraao/debrief/issues"
+  }
 }

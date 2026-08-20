@@ -12,7 +12,9 @@ npx debrief-cli
 
 One command. No account. No cloud. Your transcripts never leave your machine.
 
-![The Debrief — what happened while you were away](site/assets/debrief-home.jpg)
+![The Debrief — what happened while you were away](https://raw.githubusercontent.com/azabraao/debrief/main/site/assets/debrief-home.jpg)
+
+**Site:** [azabraao.github.io/debrief](https://azabraao.github.io/debrief/)
 
 ## Why
 

@@ -89,7 +89,7 @@ function footer() {
   const m = state.meta || {};
   const lic = m.license
     ? '<span title="Thank you for keeping Debrief alive">Founding license · thank you ♥</span>'
-    : '<a href="https://debrief.sh" target="_blank" rel="noreferrer">Free preview · get a founding license — $29 once</a>';
+    : '<a href="https://azabraao.github.io/debrief/#pricing" target="_blank" rel="noreferrer">Free preview · get a founding license — $29 once</a>';
   return `
   <footer class="foot">
     <span>◍ Debrief v${esc(m.version || '')}</span>
